@@ -12,21 +12,7 @@
     <url>http://www.immobilienscout24.de/</url>
   </organization>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-    <spring.version>4.2.4.RELEASE</spring.version>
-    <spring.security.version>4.0.3.RELEASE</spring.security.version>
-    <failsafe.plugin.version>2.17</failsafe.plugin.version>
-    <shrinkwrap.resolver.version>2.0.0-beta-3</shrinkwrap.resolver.version>
-    <jackson.version>2.6.4</jackson.version>
-    <embedded.mongodb.version>2.6.11</embedded.mongodb.version>
-    <httpclient.version>4.3.1</httpclient.version>
-    <aspectj.version>1.8.2</aspectj.version>
-    <java.util.logging.config>de/is24/infrastructure/gridfs/http/log.properties</java.util.logging.config>
-    <scm.revision>0</scm.revision>
-    <build.revision>${project.version}-${scm.revision}</build.revision>
+  <properties>    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    <spring.version>4.2.4.RELEASE</spring.version>    <spring.security.version>4.0.3.RELEASE</spring.security.version>    <failsafe.plugin.version>2.17</failsafe.plugin.version>    <shrinkwrap.resolver.version>2.0.0-beta-3</shrinkwrap.resolver.version>    <jackson.version>2.6.4</jackson.version>    <embedded.mongodb.version>2.6.11</embedded.mongodb.version>    <httpclient.version>4.3.1</httpclient.version>    <aspectj.version>1.8.2</aspectj.version>    <java.util.logging.config>de/is24/infrastructure/gridfs/http/log.properties</java.util.logging.config>    <scm.revision>0</scm.revision>    <build.revision>${project.version}-${scm.revision}</build.revision><javac.version>9+181-r4173-1</javac.version>
   </properties>
 
   <prerequisites>
@@ -419,189 +405,26 @@
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>remoteTest</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>     
-            <version>${failsafe.plugin.version}</version>
-            <configuration>
-              <skipTests>true</skipTests>              
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${failsafe.plugin.version}</version>
-            <executions>
-              <execution>
-                <id>integration-test</id>
-                <goals>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-                <configuration>
-				          <systemPropertyVariables>
-                    <embedded.mongodb.version>${embedded.mongodb.version}</embedded.mongodb.version>
-                    <remoteContainerUrl>${remote.container.url}</remoteContainerUrl>
-                    <java.util.logging.config.file>${java.util.logging.config}</java.util.logging.config.file>
-                  </systemPropertyVariables>
-                  <parallel>classes</parallel>
-                  <threadCount>5</threadCount>
-                  <perCoreThreadCount>false</perCoreThreadCount>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--
-      To start a local mongo db and tomcat use:
-        mvn -Plocal-dev com.github.joelittlejohn.embedmongo:embedmongo-maven-plugin:start org.codehaus.cargo:cargo-maven2-plugin:run
-
-      Or use maven executions:
-        mvn clean install -Plocal-dev -DskipTests=true
-    -->
-    <profile>
-      <id>local-dev</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.joelittlejohn.embedmongo</groupId>
-            <artifactId>embedmongo-maven-plugin</artifactId>
-            <version>0.1.8</version>
-            <configuration>
-              <databaseDirectory>${project.build.directory}/mongo-dev</databaseDirectory>
-              <logging>file</logging>
-            </configuration>
-              <executions>
-                  <execution>
-                      <phase>install</phase>
-                      <goals>
-                          <goal>start</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven2-plugin</artifactId>
-            <version>1.4.2</version>
-            <configuration>
-              <container>
-                <containerId>tomcat7x</containerId>
-                <systemProperties>
-                  <mongodb.serverlist>localhost</mongodb.serverlist>
-                </systemProperties>
-              </container>
-              <deployables>
-                <deployable>
-                  <properties>
-                    <context>/ROOT</context>
-                  </properties>
-                </deployable>
-              </deployables>
-            </configuration>
-              <executions>
-                  <execution>
-                      <phase>install</phase>
-                      <goals>
-                          <goal>run</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
-  <profile>
-      <id>sonar-coverage</id>
-      <activation>
-          <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-          <sonar.sources>src/main/java,src/main/webapp</sonar.sources>
-          <sonar.exclusions>**/jquery*.js,**/jquery*.css,**/token-input*.css</sonar.exclusions>
-          <sonar.jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPath>
-          <sonar.jacoco.itReportPath>${project.build.directory}/jacoco.exec</sonar.jacoco.itReportPath>
-          <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-      </properties>
-      <build>
-          <plugins>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${failsafe.plugin.version}</version>
-                  <configuration>
-                      <argLine>${argLine}</argLine>
-                  </configuration>
-              </plugin>
-              <plugin>
-                  <groupId>org.jacoco</groupId>
-                  <artifactId>jacoco-maven-plugin</artifactId>
-                  <version>0.7.1.201405082137</version>
-                  <configuration>
-                      <append>true</append>
-                  </configuration>
-                  <executions>
-                      <execution>
-                          <id>jacoco-initialize</id>
-                          <goals>
-                              <goal>prepare-agent</goal>
-                          </goals>
-                      </execution>
-                      <execution>
-                          <id>jacoco-site</id>
-                          <phase>verify</phase>
-                          <goals>
-                              <goal>report</goal>
-                          </goals>
-                      </execution>
-                  </executions>
-              </plugin>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-antrun-plugin</artifactId>
-                  <version>1.7</version>
-                  <executions>
-                      <execution>
-                          <phase>pre-integration-test</phase>
-                          <id>copy-jacoco-report</id>
-                          <configuration>
-                              <target>
-                                  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-                                  <if>
-                                      <available file="${project.build.directory}/jacoco.exec" />
-                                      <then>
-                                          <move file="${project.build.directory}/jacoco.exec" 
-                                                tofile="${sonar.jacoco.reportPath}" verbose="true" />
-                                      </then>
-                                  </if>
-                              </target>
-                          </configuration>
-                          <goals>
-                              <goal>run</goal>
-                          </goals>
-                      </execution>
-                  </executions>
-                  <dependencies>
-                      <dependency>
-                          <groupId>ant-contrib</groupId>
-                          <artifactId>ant-contrib</artifactId>
-                          <version>20020829</version>
-                      </dependency>
-                  </dependencies>
-              </plugin>
-          </plugins>
-      </build>
-  </profile>
-    
+  <profiles>    <profile>      <id>remoteTest</id>      <build>        <plugins>          <plugin>            <groupId>org.apache.maven.plugins</groupId>            <artifactId>maven-surefire-plugin</artifactId>                 <version>${failsafe.plugin.version}</version>            <configuration>              <skipTests>true</skipTests>                          </configuration>          </plugin>          <plugin>            <groupId>org.apache.maven.plugins</groupId>            <artifactId>maven-failsafe-plugin</artifactId>            <version>${failsafe.plugin.version}</version>            <executions>              <execution>                <id>integration-test</id>                <goals>                  <goal>integration-test</goal>                  <goal>verify</goal>                </goals>                <configuration>				          <systemPropertyVariables>                    <embedded.mongodb.version>${embedded.mongodb.version}</embedded.mongodb.version>                    <remoteContainerUrl>${remote.container.url}</remoteContainerUrl>                    <java.util.logging.config.file>${java.util.logging.config}</java.util.logging.config.file>                  </systemPropertyVariables>                  <parallel>classes</parallel>                  <threadCount>5</threadCount>                  <perCoreThreadCount>false</perCoreThreadCount>                </configuration>              </execution>            </executions>          </plugin>        </plugins>      </build>    </profile>    <!--      To start a local mongo db and tomcat use:        mvn -Plocal-dev com.github.joelittlejohn.embedmongo:embedmongo-maven-plugin:start org.codehaus.cargo:cargo-maven2-plugin:run      Or use maven executions:        mvn clean install -Plocal-dev -DskipTests=true    -->    <profile>      <id>local-dev</id>      <build>        <plugins>          <plugin>            <groupId>com.github.joelittlejohn.embedmongo</groupId>            <artifactId>embedmongo-maven-plugin</artifactId>            <version>0.1.8</version>            <configuration>              <databaseDirectory>${project.build.directory}/mongo-dev</databaseDirectory>              <logging>file</logging>            </configuration>              <executions>                  <execution>                      <phase>install</phase>                      <goals>                          <goal>start</goal>                      </goals>                  </execution>              </executions>          </plugin>          <plugin>            <groupId>org.codehaus.cargo</groupId>            <artifactId>cargo-maven2-plugin</artifactId>            <version>1.4.2</version>            <configuration>              <container>                <containerId>tomcat7x</containerId>                <systemProperties>                  <mongodb.serverlist>localhost</mongodb.serverlist>                </systemProperties>              </container>              <deployables>                <deployable>                  <properties>                    <context>/ROOT</context>                  </properties>                </deployable>              </deployables>            </configuration>              <executions>                  <execution>                      <phase>install</phase>                      <goals>                          <goal>run</goal>                      </goals>                  </execution>              </executions>          </plugin>        </plugins>      </build>    </profile>      <profile>      <id>sonar-coverage</id>      <activation>          <activeByDefault>false</activeByDefault>      </activation>      <properties>          <sonar.sources>src/main/java,src/main/webapp</sonar.sources>          <sonar.exclusions>**/jquery*.js,**/jquery*.css,**/token-input*.css</sonar.exclusions>          <sonar.jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPath>          <sonar.jacoco.itReportPath>${project.build.directory}/jacoco.exec</sonar.jacoco.itReportPath>          <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>      </properties>      <build>          <plugins>              <plugin>                  <groupId>org.apache.maven.plugins</groupId>                  <artifactId>maven-failsafe-plugin</artifactId>                <version>${failsafe.plugin.version}</version>                  <configuration>                      <argLine>${argLine}</argLine>                  </configuration>              </plugin>              <plugin>                  <groupId>org.jacoco</groupId>                  <artifactId>jacoco-maven-plugin</artifactId>                  <version>0.7.1.201405082137</version>                  <configuration>                      <append>true</append>                  </configuration>                  <executions>                      <execution>                          <id>jacoco-initialize</id>                          <goals>                              <goal>prepare-agent</goal>                          </goals>                      </execution>                      <execution>                          <id>jacoco-site</id>                          <phase>verify</phase>                          <goals>                              <goal>report</goal>                          </goals>                      </execution>                  </executions>              </plugin>              <plugin>                  <groupId>org.apache.maven.plugins</groupId>                  <artifactId>maven-antrun-plugin</artifactId>                  <version>1.7</version>                  <executions>                      <execution>                          <phase>pre-integration-test</phase>                          <id>copy-jacoco-report</id>                          <configuration>                              <target>                                  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />                                  <if>                                      <available file="${project.build.directory}/jacoco.exec" />                                      <then>                                          <move file="${project.build.directory}/jacoco.exec"                                                 tofile="${sonar.jacoco.reportPath}" verbose="true" />                                      </then>                                  </if>                              </target>                          </configuration>                          <goals>                              <goal>run</goal>                          </goals>                      </execution>                  </executions>                  <dependencies>                      <dependency>                          <groupId>ant-contrib</groupId>                          <artifactId>ant-contrib</artifactId>                          <version>20020829</version>                      </dependency>                  </dependencies>              </plugin>          </plugins>      </build>  </profile>    <profile>
+<id>jdk8</id>
+<activation>
+	<jdk>1.8</jdk>
+</activation>
+<build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<configuration>
+				<fork>true</fork>
+				<compilerArgs combine.children="append">
+					<arg>-J-Xbootclasspath/p:${settings.localRepository}/com/google/errorprone/javac/${javac.version}/javac-${javac.version}.jar</arg>
+				</compilerArgs>
+			</configuration>
+		</plugin>
+	</plugins>
+</build>
+</profile>
   </profiles>
 
   <build>
@@ -673,6 +496,27 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-compiler-plugin</artifactId>
+<version>3.5.1</version>
+<configuration>
+	<source>8</source>
+	<target>8</target>
+	<showWarnings>true</showWarnings>
+	<compilerArgs>
+		<arg>-XDcompilePolicy=simple</arg>
+		<arg>-Xplugin:ErrorProne -XepAllErrorsAsWarnings -Xep:AndroidJdkLibsChecker:ERROR -Xep:AssistedInjectAndInjectOnSameConstructor:ERROR -Xep:AutoFactoryAtInject:ERROR -Xep:ClassName:ERROR -Xep:ComparisonContractViolated:ERROR -Xep:DepAnn:ERROR -Xep:DivZero:ERROR -Xep:EmptyIf:ERROR -Xep:FuzzyEqualsShouldNotBeUsedInEqualsMethod:ERROR -Xep:InjectInvalidTargetingOnScopingAnnotation:ERROR -Xep:InjectMoreThanOneQualifier:ERROR -Xep:InjectScopeAnnotationOnInterfaceOrAbstractClass:ERROR -Xep:InjectScopeOrQualifierAnnotationRetention:ERROR -Xep:InjectedConstructorAnnotations:ERROR -Xep:InsecureCryptoUsage:ERROR -Xep:IterablePathParameter:ERROR -Xep:JMockTestWithoutRunWithOrRuleAnnotation:ERROR -Xep:Java7ApiChecker:ERROR -Xep:JavaxInjectOnFinalField:ERROR -Xep:LockMethodChecker:ERROR -Xep:LongLiteralLowerCaseSuffix:ERROR -Xep:NoAllocation:ERROR -Xep:NumericEquality:ERROR -Xep:ParameterPackage:ERROR -Xep:RestrictTo:ERROR -Xep:StaticOrDefaultInterfaceMethod:ERROR -Xep:UnlockMethod:ERROR -Xep:AnnotateFormatMethod:ERROR -Xep:AnnotationPosition:ERROR -Xep:AssertFalse:ERROR -Xep:AssistedInjectAndInjectOnConstructors:ERROR -Xep:BinderIdentityRestoredDangerously:ERROR -Xep:BindingToUnqualifiedCommonType:ERROR -Xep:ConstructorInvokesOverridable:ERROR -Xep:ConstructorLeaksThis:ERROR -Xep:EmptyTopLevelDeclaration:ERROR -Xep:EqualsBrokenForNull:ERROR -Xep:ExpectedExceptionChecker:ERROR -Xep:FunctionalInterfaceClash:ERROR -Xep:HardCodedSdCardPath:ERROR -Xep:InconsistentOverloads:ERROR -Xep:InvalidParam:ERROR -Xep:InvalidTag:ERROR -Xep:InvalidThrows:ERROR -Xep:MissingDefault:ERROR -Xep:MutableMethodReturnType:ERROR -Xep:NoFunctionalReturnType:ERROR -Xep:NonCanonicalStaticMemberImport:ERROR -Xep:NullableDereference:ERROR -Xep:PrimitiveArrayPassedToVarargsMethod:ERROR -Xep:ProtosAsKeyOfSetOrMap:ERROR -Xep:ProvidesFix:ERROR -Xep:QualifierWithTypeUse:ERROR -Xep:RedundantThrows:ERROR -Xep:ReturnFromVoid:ERROR -Xep:StaticQualifiedUsingExpression:ERROR -Xep:StringEquality:ERROR -Xep:SystemExitOutsideMain:ERROR -Xep:TestExceptionChecker:ERROR -Xep:UnnecessaryDefaultInEnumSwitch:ERROR -Xep:Unused:ERROR -Xep:UnusedException:ERROR -Xep:Var:ERROR -Xep:BooleanParameter:ERROR -Xep:ClassNamedLikeTypeParameter:ERROR -Xep:ConstantField:ERROR -Xep:EmptySetMultibindingContributions:ERROR -Xep:ExpectedExceptionRefactoring:ERROR -Xep:FieldCanBeFinal:ERROR -Xep:FieldMissingNullable:ERROR -Xep:ImmutableRefactoring:ERROR -Xep:LambdaFunctionalInterface:ERROR -Xep:MethodCanBeStatic:ERROR -Xep:MixedArrayDimensions:ERROR -Xep:MultiVariableDeclaration:ERROR -Xep:MultipleTopLevelClasses:ERROR -Xep:MultipleUnaryOperatorsInMethodCall:ERROR -Xep:PackageLocation:ERROR -Xep:ParameterComment:ERROR -Xep:ParameterNotNullable:ERROR -Xep:PrivateConstructorForNoninstantiableModule:ERROR -Xep:PrivateConstructorForUtilityClass:ERROR -Xep:RemoveUnusedImports:ERROR -Xep:ReturnMissingNullable:ERROR -Xep:ScopeOnModule:ERROR -Xep:SwitchDefault:ERROR -Xep:TestExceptionRefactoring:ERROR -Xep:ThrowsUncheckedException:ERROR -Xep:TryFailRefactoring:ERROR -Xep:TypeParameterNaming:ERROR -Xep:UngroupedOverloads:ERROR -Xep:UnnecessarySetDefault:ERROR -Xep:UnnecessaryStaticImport:ERROR -Xep:UseBinds:ERROR -Xep:WildcardImport:ERROR</arg>
+	</compilerArgs>
+	<annotationProcessorPaths>
+		<path>
+			<groupId>com.google.errorprone</groupId>
+			<artifactId>error_prone_core</artifactId>
+			<version>2.3.2</version>
+		</path>
+	</annotationProcessorPaths>
+</configuration>
+</plugin>
     </plugins>
   </build>
 </project>
